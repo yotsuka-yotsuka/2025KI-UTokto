@@ -1,0 +1,215 @@
+---
+title: "Assignment1"
+output: html_document
+date: "2025-03-18"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(remotes)
+library(ggplot2)
+library(readr)
+library(tidybiology)
+library(tidyverse)
+```
+
+#Task1 - Literature
+
+##2. Answer the following questions
+
+###a. What is the medically relevant insight from the article? There are selective insulin resistance in white adipose tissue during obesity.
+
+Transcriptional responses to insulin in obese WAT are selective and can be classified into at least three patterns:
+
+・Common set: Insulin-responsive genes maintained in obesity. This set includes genes encoding enzymes involved in lipid synthesis and cholesterol biosynthesis.
+
+・Obesity-specific set: Insulin-responsive genes lost in obesity but recovered in non-obese state. This set includes genes relating to pathways regulating extracellular matrix composition and angiogenesis
+
+・Post-obesity-specific set: Insulin-responsive genes particularly prominent after weight loss. This set includes genes encoding enzymes involved in one-carbon metabolism
+
+###b. Which genomics technology/ technologies were used?
+
+Cap Analysis Gene Expression (CAGE), sequencing technology for determining the 5' ends of RNA
+
+##3. Further related research questions
+
+###a. List and explain at least three questions/ hypotheses you can think of that extend the analysis presented in the paper.
+
+Hypothesis1 : The post-weight loss specific upregulation of one-carbon metabolism enzymes by insulin contributes to epigenetic changes through DNA methylation.・DNA methylation analysis by whole genome bisulfite sequencing (or long-read sequencing) to evaluate changes in methylation patterns before and after insulin stimulation.
+
+Hypothesis2 : The selective insulin resistance observed at the tissue level reflects differential responses among distinct cell populations within adipose tissue.・Single-cell transcriptome analysis (or spatial transcriptome) to reveal which cell populations drive specific aspects of selective insulin resistance.
+
+Hypothesis3 : The selective insulin resistance in adipose tissue is controllable by regulating obesity-specific pathways.
+
+#Task4 - R basic operations
+
+```{r task4}
+#What is the square root of 10?
+sqrt(10)
+#What is the logarithm of 32 to the base 2?
+log2(32)
+#What is the sum of the numbers from 1 to 1000?
+sum(1:1000)
+#What is the sum of all even numbers from 2 to 1000?
+sum(seq(2, 1000, by = 2))
+#How many pairwise comparisons are there for 100 genes?
+choose(100, 2)
+#And how many ways to arrange 100 genes in triples?
+prod(100:98)
+```
+
+1.  3.162278
+2.  5
+3.  500500
+4.  250500
+5.  4950
+6.  970200
+
+#Task5 - Using R example datasets
+
+```{r task5}
+#Use the R internal CO2 dataset (“data(CO2)”).
+data(CO2)
+#Describe briefly the content of the CO2 dataset using the help function.
+help(CO2)
+#What is the average and median CO2 uptake of the plants from Quebec and Mississippi?
+quebec_data <- subset(CO2, Type == "Quebec")
+mean(quebec_data$uptake)
+median(quebec_data$uptake)
+Mississippi_data <- subset(CO2, Type == "Mississippi")
+mean(Mississippi_data$uptake)
+median(Mississippi_data$uptake)
+```
+
+The `CO2` data frame has 84 rows and 5 columns of data from an experiment on the cold tolerance of the grass species *Echinochloa crus-galli*.
+
+average of Quebec 33.5, median 37.2
+average of Mississippi 20.8, median 19.3
+
+#Task6 - R Functions
+
+```{r task6}
+#Write a function that calculates the ratio of the mean and the median of a given vector.
+(mean(x) / median(x))
+#Write a function that ignores the lowest and the highest value from a given vector and calculate the mean.
+mean(x,-which.min(x),-which.max(x))
+```
+
+Pipe
+
+Pipe is a tool to help us write code in a way that is easier to read and understand Debugging is difficult: if I make a mistake I’ll need to re-run the complete pipeline from the beginning. Use pipes for short, linear sequences of operations on a single object. Avoid pipes for complex operations with multiple inputs/outputs. Pipes won't work with functions that use the current environment or lazy evaluation.
+
+Apply-family
+
+Apply-family functions (apply, lapply, sapply) are usefulfor efficiently processing large datasets without explicit loops.
+
+#Task7 - Basic visualization with R
+
+```{r task7}
+#Compare the distributions of the body heights of the two species from the'magic_guys.csv' dataset graphically
+#install.packages("remotes")
+#library(remotes)
+#install_url("http://emotion.utu.fi/wp-content/uploads/2019/11/nummenmaa_1.0.tar.gz",dependencies=TRUE)
+#library(ggplot2)
+#library(readr)
+magic_guys <- read_csv("drive-download-20250318T083346Z-001/magic_guys.csv")
+hist(magic_guys$length)
+#png("length_distribution.png", width = 800, height = 600)
+hist(magic_guys$length)
+dev.off()
+#png("length_boxplot.png", width = 800, height = 600)
+boxplot(magic_guys$length)
+dev.off()
+
+#Load the gene expression data matrix from the ‘microarray_data.tab’ dataset provided in the shared folder, it is a big tabular separated matrix.
+microarray_data <- read_tsv("drive-download-20250318T083346Z-001/microarray_data.tab")
+#How big is the matrix in terms of rows and columns?
+dim(microarray_data)
+#Count the missing values per gene and visualize this result.
+missing_counts <- rowSums(is.na(microarray_data))
+hist(missing_counts)
+#Find the genes for which there are more than X% (X=10%, 20%, 50%) missing values.
+total_samples <- ncol(microarray_data)
+genes_10pct <- sum(missing_counts > 0.1 * total_samples)
+genes_20pct <- sum(missing_counts > 0.2 * total_samples)
+genes_50pct <- sum(missing_counts > 0.5 * total_samples)
+cat(genes_10pct)
+cat(genes_20pct)
+cat(genes_50pct)
+#Replace the missing values by the average expression value for the particular gene. (Note: Imputing data has to be used with caution!)
+data_replace <- t(apply(microarray_data, 1, function(x) {
+  x[is.na(x)] <- mean(x, na.rm=TRUE)
+  return(x)
+}))
+head(data_replace)
+
+#Visualize the data in the CO2 dataset in a way that gives you a deeper understanding of the data. What do you see?
+ggplot(CO2, aes(x=Treatment, y=uptake)) + geom_boxplot()
+```
+
+png : small file size, suitable for social media, image quality is bad
+
+pdf : large file size, suitable for publications, image quality is good
+
+svg : small file size, suitable for web site, svg can be scaled any size
+
+Non-chilled treated grasses tend to have higher rates of CO2 uptake.
+
+#Task8
+
+```{r task8}
+#Install the Tidybiology package, which includes the data ‘chromosome’ and ‘proteins’
+devtools::install_github("hirscheylab/tidybiology")
+library(tidybiology)
+library(tidyverse)
+#Extract summary statistics (mean, median and maximum) for the following variables from the ‘chromosome’ data: variations, protein coding genes, and miRNAs. Utilize the tidyverse functions to make this as simply as possible.
+data(chromosome)
+force(chromosome)
+chromosome %>%
+  summarise(
+    mean_variations = mean(variations),
+    median_variations = median(variations),
+    max_variations = max(variations),
+    
+    mean_protein_coding = mean(protein_codinggenes),
+    median_protein_coding = median(protein_codinggenes),
+    max_protein_coding = max(protein_codinggenes),
+    
+    mean_miRNA = mean(mi_rna),
+    median_miRNA = median(mi_rna),
+    max_miRNA = max(mi_rna)
+  )
+
+#How does the chromosome size distribute? Plot a graph that helps to visualize this by using ggplot2 package functions.
+ggplot(chromosome, aes(x = id, y = length_mm)) +
+  geom_bar(stat = "identity") 
+dev.off()
+
+#Does the number of protein coding genes or miRNAs correlate with the length of the chromosome? Make two separate plots to visualize these relationships.
+ggplot(chromosome, aes(x = length_mm, y = protein_codinggenes)) +
+  geom_point()
+
+ggplot(chromosome, aes(x = length_mm, y = mi_rna)) +
+  geom_point()
+
+#Calculate the same summary statistics for the ‘proteins’ data variables length and mass. Create a meaningful visualization of the relationship between these two variables by utilizing the ggplot2 package functions. Play with the colors, theme- and other visualization parameters to create a plot that pleases you.
+data(proteins)
+proteins %>%
+  summarise(
+    mean_length = mean(length),
+    median_length = median(length),
+    max_length = max(length),
+    
+    mean_mass = mean(mass),
+    median_mass = median(mass),
+    max_mass = max(mass)
+  )
+
+ggplot(proteins, aes(x = length, y = mass)) +
+  geom_point(color = "blue")+
+  geom_smooth(method = "lm", color = "darkgrey", linetype = "dashed")+
+  labs(title = "Relationships between protein length and mass",
+       x = "amino acid length",
+       y = "protein mass")+
+  theme_minimal()
+```
